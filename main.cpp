@@ -7,10 +7,13 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <array>
 #include <algorithm>
 
-using VVString = std::vector<std::vector<std::string> >;
-using VString = std::vector<std::string>;
+
+const int n_ip = 4;
+using ipLineType = std::array<int, n_ip>;
+using VipLineType = std::vector<ipLineType>;
 
 // ("",  '.') -> [""]
 // ("11", '.') -> ["11"]
@@ -37,11 +40,11 @@ std::vector<std::string> split(const std::string &str, char d)
 	return r;
 }
 
-bool compRec(VString a, VString b, int i)
+bool compRec(ipLineType a, ipLineType b, int i)
 {
-	if (std::stoi(a.at(i)) > std::stoi(b.at(i)))
+	if (a.at(i) > b.at(i))
 		return true;
-	if (std::stoi(a.at(i)) == std::stoi(b.at(i)))
+	if (a.at(i) == b.at(i))
 	{
 		if (i < (int)a.size() - 1)
 			return compRec(a, b, i + 1);
@@ -49,11 +52,11 @@ bool compRec(VString a, VString b, int i)
 	return false;
 }
 
-void printFunc(VVString ip_pool)
+void printFunc(VipLineType ip_pool)
 {
-	for (VVString::const_iterator ip = ip_pool.cbegin(); ip != ip_pool.cend(); ++ip)
+	for (VipLineType::const_iterator ip = ip_pool.cbegin(); ip != ip_pool.cend(); ++ip)
 	{
-		for (VString::const_iterator ip_part = ip->cbegin(); ip_part != ip->cend(); ++ip_part)
+		for (ipLineType::const_iterator ip_part = ip->cbegin(); ip_part != ip->cend(); ++ip_part)
 		{
 			if (ip_part != ip->cbegin())
 			{
@@ -68,52 +71,60 @@ void printFunc(VVString ip_pool)
 
 int main(/*int argc, char const *argv[]*/)
 {
+	
 	try
 	{
-		VVString ip_pool;
+		ipLineType ip_array;
+		VipLineType ip_pool;
 
 		for (std::string line; std::getline(std::cin, line);)
 		{
-			//if (line == "") break; // убрать
-			auto v = split(line, '\t');
-			ip_pool.push_back(split(v.at(0), '.'));
+			//if (line == "") break;
+			auto temp_str = split(split(line, '\t').at(0), '.');
+
+			for (int i = 0; i < n_ip; ++i)
+			{
+				ip_array[i] = std::stoi(temp_str.at(i));
+			}			
+			ip_pool.push_back(ip_array);
 		}
+
 		// TODO reverse lexicographically sort
 
-		auto compLambda = [](VString a, VString b)
+		auto compLambda = [](ipLineType a, ipLineType b)
 		{
 			return compRec(a, b, 0);
 		};
 
-		const auto& is_first = [](VVString ip_pool, int index, int value)
+		const auto& is_first = [](VipLineType ip_pool, int index, int value)
 		{
 			decltype (ip_pool) result;
-			for (VString ip : ip_pool)
+			for (ipLineType ip : ip_pool)
 			{
-				if (std::stoi(ip.at(index)) == value)
+				if (ip.at(index) == value)
 					result.push_back(std::move(ip));
 			}
 			return result;
 		};
 
-		const auto& is_first_second = [](VVString ip_pool, int index1, int value1, int index2, int value2)
+		const auto& is_first_second = [](VipLineType ip_pool, int index1, int value1, int index2, int value2)
 		{
 			decltype (ip_pool) result;
-			for (VString ip : ip_pool)
+			for (ipLineType ip : ip_pool)
 			{
-				if (std::stoi(ip.at(index1)) == value1 && std::stoi(ip.at(index2)) == value2)
+				if (ip.at(index1) == value1 && ip.at(index2) == value2)
 					result.push_back(std::move(ip));
 			}
 			return result;
 		};
 
-		const auto& is_one_of = [](VVString ip_pool, int value)
+		const auto& is_one_of = [](VipLineType ip_pool, int value)
 		{
 			decltype (ip_pool) result;
-			for (VString ip : ip_pool)
+			for (ipLineType ip : ip_pool)
 			{
 				for (int i = 0; i < (int)ip.size(); i++)
-					if (std::stoi(ip.at(i)) == value)
+					if (ip.at(i) == value)
 					{
 						result.push_back(std::move(ip));
 						continue;
