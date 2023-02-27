@@ -40,23 +40,11 @@ std::vector<std::string> split(const std::string &str, char d)
 	return r;
 }
 
-bool compRec(ipLineType a, ipLineType b, int i)
-{
-	if (a.at(i) > b.at(i))
-		return true;
-	if (a.at(i) == b.at(i))
-	{
-		if (i < (int)a.size() - 1)
-			return compRec(a, b, i + 1);
-	}
-	return false;
-}
-
 void printFunc(VipLineType ip_pool)
 {
-	for (VipLineType::const_iterator ip = ip_pool.cbegin(); ip != ip_pool.cend(); ++ip)
+	for (auto ip = ip_pool.cbegin(); ip != ip_pool.cend(); ++ip)
 	{
-		for (ipLineType::const_iterator ip_part = ip->cbegin(); ip_part != ip->cend(); ++ip_part)
+		for (auto ip_part = ip->cbegin(); ip_part != ip->cend(); ++ip_part)
 		{
 			if (ip_part != ip->cbegin())
 			{
@@ -79,7 +67,6 @@ int main(/*int argc, char const *argv[]*/)
 
 		for (std::string line; std::getline(std::cin, line);)
 		{
-			//if (line == "") break;
 			auto temp_str = split(split(line, '\t').at(0), '.');
 
 			for (int i = 0; i < n_ip; ++i)
@@ -88,13 +75,6 @@ int main(/*int argc, char const *argv[]*/)
 			}			
 			ip_pool.push_back(ip_array);
 		}
-
-		// TODO reverse lexicographically sort
-
-		auto compLambda = [](ipLineType a, ipLineType b)
-		{
-			return compRec(a, b, 0);
-		};
 
 		const auto& is_first = [](VipLineType ip_pool, int index, int value)
 		{
@@ -123,17 +103,15 @@ int main(/*int argc, char const *argv[]*/)
 			decltype (ip_pool) result;
 			for (ipLineType ip : ip_pool)
 			{
-				for (int i = 0; i < (int)ip.size(); i++)
-					if (ip.at(i) == value)
-					{
-						result.push_back(std::move(ip));
-						continue;
-					}
+				if (std::find(std::begin(ip), std::end(ip), value) != std::end(ip))
+				{
+					result.push_back(std::move(ip));
+				}
 			}
 			return result;
 		};
 		
-		std::sort(ip_pool.begin(), ip_pool.end(), compLambda);
+		std::sort(ip_pool.begin(), ip_pool.end(), std::greater<ipLineType>{});
 		auto result1 = is_first(ip_pool, 0, 1);
 		auto result2 = is_first_second(ip_pool, 0, 46, 1, 70);
 		auto result3 = is_one_of(ip_pool, 46);
